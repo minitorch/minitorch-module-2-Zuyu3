@@ -22,7 +22,12 @@ def central_difference(f: Any, *vals: Any, arg: int = 0, epsilon: float = 1e-6) 
     Returns:
         An approximation of $f'_i(x_0, \ldots, x_{n-1})$
     """
-    raise NotImplementedError("Need to include this file from past assignment.")
+    # TODO: Implement for Task 1.1.
+    add_vals = [vals[i] if i != arg else vals[i] + epsilon for i in range(len(vals))]
+    minus_vals = [vals[i] if i != arg else vals[i] - epsilon for i in range(len(vals))]
+    dy = f(*add_vals) - f(*minus_vals)
+    dx = 2 * epsilon
+    return dy / dx
 
 
 variable_count = 1
@@ -60,7 +65,23 @@ def topological_sort(variable: Variable) -> Iterable[Variable]:
     Returns:
         Non-constant Variables in topological order starting from the right.
     """
-    raise NotImplementedError("Need to include this file from past assignment.")
+    # TODO: Implement for Task 1.4.
+    res = []
+    visited_nodes = set()
+
+    def visit(v: Variable) -> None:
+        if v.is_constant():
+            return
+        if not v.is_leaf():
+            for i in v.parents:
+                visit(i)
+
+        if not v.unique_id in visited_nodes:
+            res.insert(0, v)
+            visited_nodes.add(v.unique_id)
+
+    visit(variable)
+    return res
 
 
 def backpropagate(variable: Variable, deriv: Any) -> None:
@@ -74,7 +95,21 @@ def backpropagate(variable: Variable, deriv: Any) -> None:
 
     No return. Should write to its results to the derivative values of each leaf through `accumulate_derivative`.
     """
-    raise NotImplementedError("Need to include this file from past assignment.")
+    # TODO: Implement for Task 1.4.
+    topo = topological_sort(variable)
+    cache = {variable.unique_id: deriv}
+
+    for curr in topo:
+        if curr.is_leaf():
+            curr.accumulate_derivative(cache[curr.unique_id])
+            continue
+        data = curr.chain_rule(cache[curr.unique_id])
+        for v, d in data:
+            if v.unique_id not in cache:
+                cache[v.unique_id] = d
+            else:
+                cache[v.unique_id] += d
+
 
 
 @dataclass
